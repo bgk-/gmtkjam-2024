@@ -1,0 +1,59 @@
+include "./Globals.topi"
+
+=== BAKER {
+	if !spokenToMagistrate => PRE_MAGISTRATE 
+	else => POST_MAGISTRATE_EXPLAINER
+	// if player hasn't spoken to magistrate PRE_MAGISTRATE
+	=== PRE_MAGISTRATE {
+		if PRE_MAGISTRATE == 1 :Baker: "Hullo! Are you the inspector that the Magistrate called in? He's been expecting you."
+		else {
+            if PRE_MAGISTRATE % 2 == 0 :Baker: "The Magistrate is waiting for you!"
+            else :Baker: "You should hurry over to the Magistrate's house."
+		}
+	}
+	
+	//this happens after the player has talked to Magistrate the first time
+	=== POST_MAGISTRATE_EXPLAINER {
+	    spokenTo.add("Baker")
+	    knowsBakerInfo = true
+	    if POST_MAGISTRATE_EXPLAINER > 1 => LAST_CHAT
+		:Inspector: "I spoke to the Magistrate, and he mentioned that you're making pineberry shortcake."
+		fork QUESTION {
+			~ "Pineberry shortcake" {
+				:Inspector: "Pineberry shortcake is my favourite shortened dough and berry fruit combination!" 
+				:Inspector: "Will it be served at the party tonight?"
+				:Baker: "Yes, but if you've spoken to the Magistrate then he must have mentioned my computational gaff."
+				:Baker: "I'm afraid there won't be enough shortcake for everyone to have some."
+				:Inspector: "I don't suppose you could put a piece aside for me? Inspectoring is famishing work."
+				:Baker: "It's out of my hands! Maybe you can start with dessert first, and then move on to entrées and appetizers."
+				:Baker: "But are you even invited to the party tonight?"
+				=> QUESTION
+			}
+			~ "The scale" {
+				:Inspector: "After the Magistrate weighed out the butter you had on hand, what happened to the scale?"
+				:Baker: "I honestly can't recall." 
+				:Baker: "I was so upset about not having enough ingredients for all the shortcake I had planned to make" 
+				:Baker: "That I wasn't able to pay attention to anything else."
+				:Inspector: "That is perfectly understandable."
+				:Inspector: "I, too, can't help but think of the pineberry shortcake that might never make it to my stomach."
+				:Inspector: "The Magistrate said the Farmer might have left that evening with the scale."
+				:Baker: "Hmm is that so? I don't remember seeing the Farmer with it but like I said,"
+				:Baker: "I was more concerned about the shortcake shortage than anything else."
+				:Baker: "I do remember hearing from the Hunter that she needed to weigh out her fresh game, though."
+				=> QUESTION
+			 }
+			 ~ "Leave" => NUDGE
+		}
+	}
+	
+	//this happens if you try talking to the BAKER again, after BAKER.POST_MAGISTRATE_EXPLAINER, and gets repeated as needed
+	=== LAST_CHAT {
+		:Inspector: "Is there anything else you can share that might help?"
+		:Baker: "I don't think so. If you don't have any additional questions, I really should get back to baking!"
+		:Baker: "There's still more to be baked for the party tonight."
+		fork {
+			~ "Actually, I want to revisit what we discussed before." => POST_MAGISTRATE_EXPLAINER
+			~ "I'll leave you to it. If there's any way you can save me some pineberry shortcake, I would really appreciate it." => NUDGE
+		}
+	}
+}

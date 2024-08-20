@@ -1,0 +1,12 @@
+﻿var spokenToMagistrate = false
+var knowsBakerInfo = false
+var knowsHunterInfo = false
+var spokenTo = Set{}
+
+extern const hasFlag = |x| return false
+extern const addFlag = |x| print("addFlag: {x}")
+extern const end = || print("end")
+
+=== NUDGE {
+    if spokenTo.count() >= 6 :Inspector: "I think I should head back to the Magistrate."
+}

@@ -1,0 +1,57 @@
+include "./Globals.topi"
+
+=== FARMER {
+	if !spokenToMagistrate => PRE_MAGISTRATE 
+	else => POST_MAGISTRATE_EXPLAINER
+	
+	=== PRE_MAGISTRATE {
+		if PRE_MAGISTRATE == 1 :Farmer: "It's not often we get a visitor from the city. Will you be staying for the party?"
+		else {
+		    if PRE_MAGISTRATE % 2 == 0 :Farmer: "The Magistrate is fretting over tonight's victuals."
+		    else :Farmer: "I heard him muttering about how his party will be ruined if you fail to help him. No pressure!"
+		}
+	}
+	
+	=== POST_MAGISTRATE_EXPLAINER {
+	    spokenTo.add("Farmer")
+	    if POST_MAGISTRATE_EXPLAINER > 1 => LAST_CHAT
+		:Inspector: "I heard you were accused by the Baker of shortchanging his shortening."
+		fork QUESTION {
+			~ "The butter incident" {
+				:Farmer: "It was nothing more than a harmless misunderstanding."
+				:Inspector: "Can we really call it harmless when we're at risk of a shortcake shortage at the party tonight?"
+				:Farmer: "... You can have my share of shortcake. Don't be upset."
+				:Farmer: "It wouldn't have made a difference anyway." 
+				:Farmer: "Even if the Baker had ordered the right amount of butter, I wouldn't have been able to supply it."
+				:Inspector: "Why is that? You seem to have a good number of dairy cows."
+				:Farmer: "The Kids help themselves to fresh butter and cheese at the farm after school, but they must be at an age where they're especially hungry." 
+				:Farmer: "Most days, they just about clear out my extra stock."
+				:Farmer: "I often see them hanging around outside the barn."
+				=> QUESTION
+			}
+			~ "The scale" {
+				:Inspector: "After the Magistrate weighed out the butter, what happened to the scale?"
+				:Farmer: "I wish I could help, but I have no idea. The incident with the Baker made me realize that I had no butter to spare."
+				:Farmer: "I was eager to rush home and get to churning and coagulating, so I did just that. The scale wasn't on my mind at all."
+				:Inspector: "I get the churning, but why the coagulating?"
+				:Farmer: "Coagulation is the pivotal step during the cheesemaking process when liquid dairy solidifies into delicious fresh cheese!"
+				:Inspector: "I'm not sure why, but hearing about coagulation makes the thought of eating cheese just a little less appealing."
+				=> QUESTION
+			 }
+			 ~ "Leave" => NUDGE
+		}
+	}
+	
+	//this happens if you try talking to the FARMER again, after FARMER.POST_MAGISTRATE_EXPLAINER, and gets repeated as needed
+	=== LAST_CHAT {
+		:Inspector: "What else can you tell me about the scale?"
+		:Farmer: "Nothing that would be useful." 
+		:Farmer: "I took it from the Candlestick Maker's shop early on in the week, but it was definitely still around days after that."
+		:Farmer: "Like we discussed earlier, it was used to settle the dispute between myself and the Baker the day before last!
+		fork {
+			~ "In that case, I want to revisit what we discussed before." => POST_MAGISTRATE_EXPLAINER
+			~ "All right then. Thanks again for all your help!" => NUDGE
+		}
+	}
+	
+}

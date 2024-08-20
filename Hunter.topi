@@ -1,0 +1,96 @@
+include "./Globals.topi"
+
+=== HUNTER {
+	if !spokenToMagistrate => PRE_MAGISTRATE 
+	else => POST_MAGISTRATE_EXPLAINER
+	
+	// if player hasn't spoken to magistrate PRE_MAGISTRATE
+	=== PRE_MAGISTRATE {
+		if PRE_MAGISTRATE == 1 :Hunter: "The Magistrate's always fussing over something or other."
+		else {
+            if PRE_MAGISTRATE % 2 == 0 :Hunter: "He gets overly stimulated by every little thing."
+            else :Hunter: "If not for the party, I wouldn't even be in town today... Maybe I should just go home."
+		}
+	}
+	
+	//this happens after the player has talked to Magistrate the first time
+	=== POST_MAGISTRATE_EXPLAINER {
+	    spokenTo.add("Hunter")
+	    if knowsBakerInfo => POST_BAKER_INFO
+	    if POST_MAGISTRATE_EXPLAINER > 1 => LAST_CHAT
+		:Hunter: "I don't know anything and I'm pretty sure I can't help you."
+		:Inspector: "Can I ask some questions anyway?"
+		:Hunter: "If you must, lest I be accused of impeding your investigation."
+		fork QUESTION {
+			~ "Wild game" {
+				:Inspector: "You were responsible for delivering wild game to the Butcher?"
+				:Hunter: "Yes. I deliver everything I catch to the Butcher, so he can do his butchering."
+				:Inspector: "That makes sense."
+				:Inspector: "When did you last drop off game at the Butcher's?"
+				:Hunter: "I was out hunting all of yesterday, so it must have been the day before, on Wednesday, when I last saw him."
+				:Inspector: "And what kind of game did you deliver on Wednesday?"
+				:Hunter: "Venison and some wild geese."
+				:Hunter: "... Is any of this relevant to finding the scale?"
+				:Inspector: "No, not really."
+				=> QUESTION
+			}
+			~ "The scale" {
+				:Inspector: "When were you last in position of the scale?"
+				:Hunter: "I had the scale on Wednesday. I used it to weight the geese that I had caught the day before."
+				:Inspector: "What happened to the scale after you used it?"
+				:Hunter: "I don't know. I left it at the Butcher's."
+				:Inspector: "And you haven't seen it since?"
+				:Hunter: "No."
+				:Inspector: "Um. I guess I have nothing more to ask."
+				:Inspector: "Thank you for your concise, if not unenthusiastic, cooperation."
+				=> QUESTION
+			 }
+			 ~ "Leave" => NUDGE
+		}
+	}
+	
+	// This happens if player has gone through BAKER.POST_MAGISTRATE_EXPLAINER. 
+	// If player talks to Magistrate (MAGISTRATE.EXPLAINING_THE_CASE) and 
+	// then talks to Baker (BAKER.POST_MAGISTRATE_EXPLAINER) before talking to the Hunter, 
+	// then it means that HUNTER.POST_MAGISTRATE_EXPLAINER never triggers
+	=== POST_BAKER_INFO {
+	    if POST_BAKER_INFO > 1 => LAST_CHAT
+		:Inspector: "The Baker mentioned you when I talked to him earlier."
+		:Inspector: "He said you needed the scale the day before yesterday to weigh some fresh-caught game."
+		fork QUESTION {
+			~ "Hunting" {
+				:Hunter: "Yes, that's right. The day before yesterday, on Wednesday, I weighed some birds that I had on hand."
+				:Inspector: "Do you often go hunting?"
+				:Hunter: "It's how I make a living, so yes. I go a couple of times each week."
+				:Inspector: "When were you out hunting this week?"
+				:Hunter: "I was out yesterday, and then two days before that, on Tuesday."
+				:Inspector: "What kind of game do you usually hunt?"
+				:Hunter: "Deer, wild birds--geese, this time of year. Sometimes wild boar."
+				:Inspector: "I see. I guess none of this is relevant to finding the scale."
+				:Hunter: "No, it's not."
+				=> QUESTION
+			}
+			~ "The scale" {
+				:Inspector: "So you were possibly the last person to have used the scale?"
+				:Hunter: "Why would you think that?"
+				:Inspector: "Well, it was missing all of yesterday, and you used it on Wednesday."
+				:Hunter: "Yes, at one point on Wednesday, I did have the scale, but I left it at the Butcher's."
+				:Hunter: "If anything, the Butcher should have been the last person with the scale."
+				:Inspector: "Aha! Now we're getting somewhere."
+				:Hunter: "Does this mean you'll now leave me alone?"
+				=> QUESTION
+			}
+			~ "Leave" => NUDGE
+		}
+	}
+	
+	//this happens if you try talking to the Hunter again, after HUNTER.POST_BAKER_INFO, and gets repeated as needed
+	=== LAST_CHAT {
+		:Inspector: "Do you have anything else to share that might be helpful?"
+		:Hunter: "No."
+		fork {
+			~ "In that case, I want to revisit what we discussed before." => POST_BAKER_INFO
+			~ "Then I'll leave you alone. Thanks for your help!" => NUDGE
+		}
+	}		
+}

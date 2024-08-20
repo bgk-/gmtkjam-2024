@@ -1,0 +1,100 @@
+include "./Globals.topi"
+
+=== KIDS {
+	if !spokenToMagistrate => PRE_MAGISTRATE 
+	else => POST_MAGISTRATE_EXPLAINER
+	
+	=== PRE_MAGISTRATE {
+	    if PRE_MAGISTRATE == 1 {
+            :Primus: "Hey, Mister! You look so cool!"
+            :Secundus: "Ooh yeah, so cool!"
+            :Tertius: "Awesome!"
+            :Quartus: "Super awesome!"
+            :Five: "You don't look very impressive for an inspector."
+		} else {
+            :Primus: "We've been invited to tonight's party! I bet the food is going to be soooo good."
+            :Secundus: "So very good!"
+            :Tertius: "Delicious!"
+            :Quartus: "Super delicious!"
+            :Five: "I think I got food posioning at the last party."
+		}
+	}
+	
+	=== POST_MAGISTRATE_EXPLAINER {
+	    spokenTo.add("Kids")
+	    if hasFlag("readBlackboard") and KIDS.POST_BLACKBOARD_INFO == 0 => KIDS.POST_BLACKBOARD_INFO
+	    else if POST_MAGISTRATE_EXPLAINER > 1 => LAST_CHAT
+	    
+		:Inspector: "I was hoping you kids could help me with my case."
+		:Primus: "Aw yeah, helping out with official detective business!"
+		:Secundus: "Yeah yeah, we're helping out!"
+		:Tertius: "We're solving the case!"
+		:Quartus: "We're solving the case so hard!"
+		:Five: "I don't think we can help you at all."
+		fork QUESTION {
+			~ "Today's lesson" {
+				:Inspector: "What are you learning about today?"
+				:Primus: "We're working hard and studying maths!"
+				:Secundus: "We're working -so- hard!"
+				:Tertius: "With intense focus!"
+				:Quartus: "Super intense focus!"
+				:Five: "We weren't paying attention and have no idea what the teacher was saying."
+				=> QUESTION
+			}
+			~ "The scale" {
+				:Inspector: "Have you ever used the scale during a lesson?"
+				:Primus: "Nuh-uh. How could a scale be used in a lesson?"
+				:Secundus: "Yeah, there's no learning with a scale!"
+				:Tertius: "We're learning maths, not scales!"
+				:Quartus: "We're super learning maths!"
+				:Five: "I don't think we know what a scale is."
+				=> QUESTION
+			 }
+			 ~ "Leave" => NUDGE
+		}
+	}
+	
+	// this happens the first time the player talk to the KIDS, after examining the blackboard. 
+	// If player examines the blackboard before ever talking to the KIDS, then this plays the first time, and if you talk to the KIDS a second time, 
+	// KIDS.POST_MAGISTRATE_EXPLAINER plays
+	=== POST_BLACKBOARD_INFO {
+		:Inspector: "I was looking at your recent lessons on the blackboard."
+		fork QUESTION {
+			~ "Arithmetic" {
+				:Inspector: "It looks like you're studying some basic arithmetic?"
+				:Primus: "Huh? What's arithmetic?"
+				:Secundus: "Yeah, what's that?"
+				:Tertius: "We don't know what you're talking about."
+				:Quartus: "We super don't know what you're talking about."
+				:Five: "We're learning times and divides."
+				=> QUESTION
+			}
+			~ "Scales" {
+				:Inspector: "What about the scales that your teacher had drawn on the board a couple of days ago?"
+				:Inspector: "She erased it, but there are still some outlines."
+				:Primus: "What's scales?"
+				:Secundus: "Yeah, what's that?"
+				:Tertius: "We don't know scales."
+				:Quartus: "We super don't know scales."
+				:Five: "The teacher showed us big things and little things."
+				=> QUESTION
+			}
+			if KIDS.POST_MAGISTRATE_EXPLAINER == 0 ~ "Continue" => KIDS.POST_MAGISTRATE_EXPLAINER
+			else ~ "Leave" => NUDGE
+		}
+	}
+	
+	//this happens if you try talking to the KIDS again, after KIDS.POST_MAGISTRATE_EXPLAINER, and gets repeated as needed (except when KIDS.POST_BLACKBOARD_INFO is triggered)
+	=== LAST_CHAT {
+		:Inspector: "Is there anything else you want to tell me?"
+		:Primus: "We have a small snack on the farm every day after school!"
+		:Secundus: "Ooh yeah, a small snack!"
+		:Tertius: "Just a little bit after school!"
+		:Quartus: "A super little bit!"
+		:Five: "We eat all the bread, butter and cheese that we find."
+		fork {
+			~ "Actually, I want to revisit what we discussed before." => POST_MAGISTRATE_EXPLAINER
+			~ "Snacking on bread, butter and cheese every day sounds pretty nice." => NUDGE
+		}
+	}
+}

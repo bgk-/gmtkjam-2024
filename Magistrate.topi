@@ -1,0 +1,167 @@
+include "./Globals.topi"
+
+var count = 0
+=== MAGISTRATE {
+	spokenToMagistrate = true
+	if spokenTo.count() >= 6 => SOLVING_THE_CASE
+	if hasFlag("checkedMagistratesDesk") => POST_DESK_INFO
+	if EXPLAINING_THE_CASE > 0 => POST_EXPLAINER 
+	else => EXPLAINING_THE_CASE
+	
+	=== EXPLAINING_THE_CASE {
+	    if !hasFlag("checkedMagistratesDesk") :Magistrate: "Oh, thank goodness you're finally here! If you don't help me, my party tonight will be ruined!"
+		fork^ {
+			~ "How can I help" {
+				:Inspector: "Tell me about your problem, sir! I'm sure we'll have things figured out in no time."
+			}
+			~ "I'm on it" {
+				:Inspector: "That's why I'm here! I won't rest until the case is solved."
+			}
+		}
+		:Magistrate: "If the food's to be ready in time, the kitchen needs to start prepping the venison and wild geese right away!" 
+		:Magistrate: "But the Butcher is unable to deliver the meat!"
+		:Inspector: "Why is that? Was there a shortage of wild game?"
+		:Magistrate: "No, it's worse than that: our town scale is missing! Without the scale, the Butcher can't weigh out my order."
+		:Inspector: "I have a pretty good eye for measurements, sir! I can help the Butcher figure out how much to deliver."
+		:Inspector: "Although that doesn't quite put my skills as an inspector to use..."
+		:Magistrate: "My dear boy, how could we allow that? I paid for 7 pounds of venison and 5 and a half pounds of wild geese."
+		:Magistrate: "It would be an affront to the order of society if I were to get any less or any more than what I paid for!"
+		:Magistrate: "If we cannot respect the sanctity of precise economic exchanges,"
+		:Magistrate: "then we are inviting chaos into the social contracts under which we live and thrive."
+		:Magistrate: "The scales of all that is right and fair must be upheld at all costs!"
+		:Inspector: "... I, uh, see where you're coming from, sir!" 
+		:Inspector: "I shall retrieve the town scale with the utmost haste and due diligence."
+		:Inspector: "Can you tell me where you last saw the scale?"
+		:Magistrate: "The scale was in my possession the day before yesterday, I believe."
+		:Magistrate: "Yes, yes, that's right. Wednesday evening." 
+		:Magistrate: "It served sweet lady justice in settling a dispute between the Baker and the Farmer."
+		:Magistrate: "That's the last time I saw it."
+		:Magistrate: "I didn't realize it had gone missing until this morning, when I had to confront the Butcher for the missed delivery!"
+		:Magistrate: "Oh dear, oh dear. What's to become of my party? Ohhhh..."
+		=> POST_EXPLAINER
+	}
+	
+	=== POST_EXPLAINER {
+	    if POST_EXPLAINER > 1 => LAST_CHAT
+		:Inspector: "Tell me more about what happened Wednesday evening."
+		fork QUESTION {
+			~ "The dispute" {
+				:Inspector: "What was the dispute about?"
+				:Magistrate: "While preparing the batter for his pineberry shortcake, the Baker realized he was short 2/5 of a pound of butter."
+				:Magistrate: "He accused the Farmer of shortchanging him on his dairy order," 
+				:Magistrate: "but the Farmer swore up and down that he had set aside the right amount of butter for the delivery."
+				:Inspector: "So how was the dispute resolved?"
+				:Magistrate: "The scales of justice never lie, my boy, and neither does our town scale!" 
+				:Magistrate: "I checked the measurement myself, and the Baker's butyraceous bundle was absolutely not lacking in any way."
+				:Magistrate: "The Baker had doubled his shortcake recipe, and forgot to double his butter order accordingly."
+				=> QUESTION
+			}
+			~ "The scale" {
+				:Inspector: "After the dispute was settled, what happened to the scale?"
+				:Magistrate: "I cannot say for sure, but I believe the Farmer took it." 
+				:Magistrate: "He mentioned a possible dairy shortage. I imagine he needed the scale to sort things out."
+				:Inspector: "You don't recall seeing the scale yesterday?"
+				:Magistrate: "I was in the next town over yesterday, picking up my brand new party waistcoat." 
+				:Magistrate: "Alas, I am generally out of the loop when it comes to yesterday's goings on about town."
+				=> QUESTION
+			 }
+			 ~ "Leave" {}
+		}
+	}
+	
+	// This happens the first time the player talk to the MAGISTRATE, after examining his desk. 
+	// If player examines the desk before ever talking to the MAGISTRATE, then this plays the first time
+	=== POST_DESK_INFO {
+		:Magistrate: "You can't snoop around my desk! There's sensitive town information stored there."
+		:Inspector: "Sorry, sir! I wasn't trying to snoop. Just investigating."
+		:Magistrate: "Well, you won't find anything here."
+		:Magistrate: "Here is the home of just and fair decrees. 
+		:Magistrate: "Where I use the very best of my practicality and reason to resolve town issues and disputes.
+		:Magistrate: "It most certainly is not where a missing scale might be hiding."
+		:Inspector: "Of course, sir."
+		if MAGISTRATE.EXPLAINING_THE_CASE == 0 => MAGISTRATE.EXPLAINING_THE_CASE
+	}
+	
+	//this happens if you try talking to the MAGISTRATE again, after MAGISTRATE.POST_EXPLAINER has played, 
+	// and gets repeated as needed until you've talked to all the townspeople at least once 
+	// (except if MAGISTRATE.POST_DESK_INFO is triggered)
+	=== LAST_CHAT {
+		:Inspector: "What more can you tell me about the scale and its whereabouts?"
+		:Magistrate: "Nothing! Absolutely nothing. If I knew more about its whereabouts, I wouldn't have needed to ask you to come!"
+		fork {
+			~ "In that case, I want to revisit what we discussed before." => POST_EXPLAINER
+			~ "Fair point, sir! I will talk to the other townspeople." {}
+		}
+	}
+	
+	// This happens after you've talked to all the townspeople at least once
+	=== SOLVING_THE_CASE {
+		:Inspector: "I believe I know where the scale is, sir!"
+		:Inspector: "Let's go over the facts for each person."
+		fork FACTS {
+			~* "The Butcher" {
+                :Inspector: "It can't be the Butcher because it disappeared from his shop Wednesday evening."
+                count += 1
+                if count >= 6 => ACCUSE
+                else => FACTS
+			}
+			~* "The Baker" { 
+                :Inspector: "It can't be the Baker because he didn't leave with the scale after his dispute with the Farmer was settled."
+                count += 1
+                if count >= 6 => ACCUSE
+                else => FACTS
+			}
+			~* "The Candlestick Maker" {
+                :Inspector: "The Candlestick Maker was out of town, and has no idea what's going on."
+                count += 1
+                if count >= 6 => ACCUSE
+                else => FACTS
+			}
+			~* "The Farmer" {
+                :Inspector: "It can't be the Farmer because he didn't have it after his dispute with the Baker was settled."
+                count += 1
+                if count >= 6 => ACCUSE
+                else => FACTS
+			}
+			~* "The Hunter" {
+                :Inspector: "It can't be the Hunter because she used the scale before the dispute between the Baker and the Farmer."
+                count += 1
+                if count >= 6 => ACCUSE
+                else => FACTS
+			}
+			~* "The Kids" {
+                :Inspector: "It can't be the Kids because they never came in contact with the town scale."
+                count += 1
+                if count >= 6 => ACCUSE
+                else => FACTS
+			}
+		}
+		
+		=== ACCUSE {
+            :Magistrate: "But that's impossible! There's no one left in town that could be in possession of the town scale."
+            :Inspector: "Not quite, sir."
+            :Inspector: "There is still one person we have yet to discuss."
+            fork^ {
+                ~ "J'accuse...!" {}
+                ~ "It was you!" {}
+            }
+            :Magistrate: "How could it be me? I was the one who called you in to solve this mystery!"
+            :Magistrate: "What are you implying?"
+            :Inspector: "I'm not implying anything, sir." 
+            :Inspector: "Just that when you have eliminated all other options, whatever remains, however unlikely, must be the truth!"
+            :Inspector: "Er... That sounded better in my head. I think it came out a bit wrong, somehow."
+            :Magistrate: "Never mind that! Explain yourself."
+            :Inspector: "No one else can be in possession of the scale."
+            :Inspector: "You, yourself, told me that you used it Wednesday to settle the dispute between the Baker and the Farmer."
+            :Inspector: "Neither of them left with the scale that night."
+            :Inspector: "And so with my deductive skills, I deduce that the scale is, in fact..."
+            :Inspector: "Locked away in one of your desk drawers!"
+            :Inspector: "In your hurry to get home and prepare for the next day's excursion to pick up your party waistcoat from the neighbouring town," 
+            :Inspector: "You inadvertently locked away the town scale with the sensitive town information that you strive so hard to protect."
+            :Magistrate: "My goodness, you're right! Here it is!"
+            :Inspector: "And so ends the case of the missing town scale."
+            :Inspector: "As thanks, is there any way I can get some pineberry shortcake later?"
+            end()
+		}
+	}
+}

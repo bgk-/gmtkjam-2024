@@ -1,0 +1,101 @@
+include "./Globals.topi"
+
+=== BUTCHER {
+	if !spokenToMagistrate => PRE_MAGISTRATE 
+	else => POST_MAGISTRATE_EXPLAINER
+	
+	=== PRE_MAGISTRATE {
+	    if PRE_MAGISTRATE == 1 :Butcher: "Why are you here chitchatting? Don't you have a job to do?"
+		else {
+            if PRE_MAGISTRATE % 2 == 0 :Butcher: "You have to find the scale or this will haunt me forever."
+            else :Butcher: "Without your assistance, I'm doomed."
+		}
+	}
+	
+	=== POST_MAGISTRATE_EXPLAINER {
+	    spokenTo.add("Butcher")
+	    if knowsHunterInfo => POST_HUNTER_INFO
+		:Inspector: "It seems like aside from the Magistrate, you're most affected by the missing scale."
+		:Butcher: "Don't I know it! No doubt the Magistrate will blame me for not having delivered the meat earlier, before the scale went missing."
+		fork QUESTION {
+			~ "Late delivery" {
+				:Inspector: "Oh? Was the delivery delayed?"
+				:Butcher: "Through no fault of my own!" 
+				:Butcher: "The Hunter caught less game than expected last week, and I had to wait a couple of days for her to make up the deficit."
+				:Inspector: "When did that happen?"
+				:Butcher: "She dropped off the venison and the last of the missing geese on Wednesday."
+				:Butcher: "I got to butchering right away, with the intention of delivering the meat to the Magistrate yesterday."
+				:Inspector: "But the delivery obviously didn't happen."
+				:Butcher: "How could it?" 
+				:Butcher: "I finished butchering the meat, but then had no way of doing the measuring--"
+				:Butcher: "7 pounds of venison and 5 and a half pounds of wild geese for the Magistrate's party."
+				:Butcher: "And it's not like I could go with an estimate."
+				:Inspector: "Ah yes. The Magistrate explained to me the necessity of precise measurements quite enthusiastically."
+				=> QUESTION
+			}
+			~ "The scale" {
+				:Inspector: "When did you last see the scale?"
+				:Butcher: "It was in my shop on Wednesday." 
+				:Butcher: "The Hunter brought it with her to weigh out the geese that she'd caught."
+				:Inspector: "It was in your shop!"
+				:Inspector: "Yet you still didn't get a chance to measure out the order for the Magistrate?"
+				:Butcher: "By the time I was done butchering the game from the Hunter, the scale was gone."
+				:Inspector: "And you have no idea what happened to it?"
+				:Butcher: "I was hard at work trying to get the order prepped for the Magistrate." 
+				:Butcher: "I didn't notice anyone coming into my shop."
+				:Inspector: "Could the scale still be in your shop somewhere?"
+				:Butcher: "That's impossible. I searched high and low, in every nook and cranny, three times over." 
+				:Butcher: "There is no way it could be in my shop."
+				=> QUESTION
+			 }
+			 ~ "Leave" => NUDGE
+		}
+	}
+	
+	// this happens if player has gone through HUNTER.POST_BAKER_INFO. 
+	// If player talks to Baker (BAKER.POST_MAGISTRATE_EXPLAINER) 
+	// and then Hunter (HUNTER.POST_BAKER_INFO) before talking to the Butcher, 
+	// then it means that BUTCHER.POST_MAGISTRATE_EXPLAINER never triggers
+	=== POST_HUNTER_INFO {
+	    if POST_HUNTER_INFO > 1 => LAST_CHAT
+		:Inspector: "The Hunter said that you're most likely the last person to have had the scale."
+		:Inspector: "She said she left the scale at your shop on Wednesday, after weighing her fresh game."
+		fork QUESTION {
+			~ "Fresh game" {
+				:Butcher: "The Hunter is trying to pin this on me? She's the reason why I'm in this predicament in the first place!"
+				:Inspector: "How's that?"
+				:Butcher: "I was supposed to deliver the meat to the Magistrate earlier this week."
+				:Butcher: "But the Hunter caught less game than expected last week. 
+				:Butcher: "I had to wait a couple of days for her to make up the deficit."
+				:Inspector: "When did that happen?"
+				:Butcher: "She dropped off the venison and the last of the missing geese on Wednesday."
+				:Butcher: "I got to butchering right away, with the intention of delivering the meat to the Magistrate yesterday."
+				:Inspector: "But the delivery obviously didn't happen."
+				:Butcher: "How could it? I finished butchering the meat, but then had no way of doing the measuring--" 
+				:Butcher: "7 pounds of venison and 5 and a half pounds of wild geese for the Magistrate's party."
+				=> QUESTION
+			}
+			~ "The scale" {
+				:Butcher: "It's true that it was in my shop on Wednesday."
+				:Inspector: "Yet you still didn't get a chance to measure out the order for the Magistrate?"
+				:Butcher: "By the time I was done butchering the game that the Hunter dropped off, the scale was gone."
+				:Inspector: "And you have no idea what happened to it?"
+				:Butcher: "I was hard at work trying to get the order prepped for the Magistrate. I didn't notice anyone coming into my shop, let alone taking the scale."
+				:Inspector: "Could the scale still be in your shop somewhere?"
+				:Butcher: "That's impossible. I searched high and low, in every nook and cranny, three times over. There is no way it could be in my shop."
+				=> QUESTION
+			}
+			~ "Leave" => NUDGE
+		}
+	}
+	
+	//this happens if you try talking to the Butcher again, after BUTCHER.POST_HUNTER_INFO, and gets repeated as needed
+	=== LAST_CHAT {
+		:Inspector: "Do you have any other information that might be helpful?"
+		:Butcher: "No. You can look around my shop yourself! There's no way the scale is here."
+		fork {
+			~ "In that case, I want to revisit what we discussed before." => POST_HUNTER_INFO
+			~ "I will take a look around. Thanks for the invitation." => NUDGE
+		}
+	}
+}

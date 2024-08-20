@@ -1,0 +1,103 @@
+include "./Globals.topi"
+
+=== CANDLESTICK_MAKER {
+	if !spokenToMagistrate => PRE_MAGISTRATE 
+	else => POST_MAGISTRATE_EXPLAINER
+	
+	=== PRE_MAGISTRATE {
+		if PRE_MAGISTRATE == 1 :CM: "Ho there! You must be the inspector that the Magistrate's been waiting for."
+		else {
+            if PRE_MAGISTRATE % 2 == 0 :CM: "He's in a tizzy over the missing town scale."
+            else {
+                :CM: "It seems silly to be involving you in this,"
+                :CM: "but the Magistrate's a stickler for numbers and if we can't measure everything out precisely," 
+                :CM: "I'm afraid he'll suffer an apoplectic fit."
+            }
+		}
+	}
+	
+	=== POST_MAGISTRATE_EXPLAINER {
+	    spokenTo.add("CM")
+	    if POST_MAGISTRATE_EXPLAINER > 1 => LAST_CHAT
+		:Inspector: "I'm just making the rounds, talking to folks, getting to the bottom of things."
+		fork QUESTION {
+			~ "Helpful information" {
+				:CM: "Yes, yes. Rightly so! I'm happy to share any and all information that I might have."
+				:Inspector: "Wonderful! Tell me everything you know about the scale's whereabouts during the last few days."
+				:CM: "Absolutely! I can most certainly divulge everything I know."
+				:CM: ". . ."
+				:Inspector: ". . ."
+				:CM: ". . ."
+				:Inspector: "Um... So what is it that you know?"
+				:CM: "Oh... I guess I don't actually know anything at all. I've been out of town the past few days."
+				:Inspector: "So you don't know anything useful at all?"
+				:CM: "Now that I think about it, I don't think I do. I left first thing Tuesday morning, and got back yesterday evening."
+				:CM: "I guess information from Monday evening isn't that useful to you, eh?"
+				:Inspector: "Not really, no."
+				:CM: "Well, if I hadn't gone away and did have useful information, I definitely would have been most willing to share it with you!"
+				:Inspector: "And in that hypothetical situation, I would have thanked you profusely."
+				=> QUESTION
+			}
+			~ "The scale" {
+				:CM: "I did have the scale on Monday, when I was measuring out ingredients for the custom candles that the Magistrate requested for his party."
+				:CM: "By Monday evening, though, it was out of my hands. The Farmer picked it up as I was packing for my trip."
+				:Inspector: "I see. You know, I consider myself something of a candle aficionado. What was special about these candles?"
+				:CM: "It was some of my finest work, if I do say so myself." 
+				:CM: "The Magistrate had requested candles with scents that would evolve through the course of the night."
+				:Inspector: "Evolving candles! I've never heard of such a thing. How does it work?"
+				:CM: "As per the Magistrate's request, they start off with a refreshing aroma,"
+				:CM: "then transition into a scent to whet the appetite," 
+				:CM: "and finally end with a soothing effect to round out the night."
+				:Inspector: "That sounds incredible. What kind of scents did you incorporate?"
+				:CM: "Peppermint with hints of fresh cut grass, smoked bacon and peanut butter with a dash of vanilla, and then lavender lemon hawthorn."
+				:CM: "Impressive, right?"
+				:Inspector: "I can say with great confidence that your candles will be the talk of the town."
+				=> QUESTION
+			 }
+			 ~ "Leave" => NUDGE
+		}
+	}
+	
+	=== LAST_CHAT {
+		:Inspector: "Do you have anything to add that might help me with my search?"
+		:CM: "I don't think so. I wish I knew more, but I've been visiting my sister who lives a few towns over."
+		fork QUESTION {
+			~ "Your sister" {
+				:Inspector: "Is your sister also a candle maker?"
+				:CM: "No, she doesn't quite have the nose for it."
+				:Inspector: "She would never think to combine bacon with peanut butter and vanilla?"
+				:CM: "Exactly! It takes a very discerning sense of smell to do what I do."
+				:Inspector: "Why visit now, just before the Magistrate's big party?" 
+				:Inspector: "Wasn't it risky to leave town when you had the custom candles to work on?"
+				:CM: "It was the perfect time to go on a short vacation." 
+				:CM: "See, after the candles are made, they have to cure for a few days." 
+				:CM: "There was nothing more for me to do here."
+				:CM: "So I finished making the candles, left while they were curing."
+				:CM: "Then came back yesterday evening after they were ready."
+				:Inspector: "Have you delivered the candles yet?"
+				:CM: "Not yet! I'll be bringing them to the Magistrate's house just before the party."
+				:CM: "I think the candles are going to knock everyone's socks off!"
+				:Inspector: "Knock their socks off, make their eyes water, and irritate their noses..."
+				:CM: "What was that?"
+				:Inspector: "Nothing! Just muttering to myself."
+				=> QUESTION
+			}
+			~ "Your shop" {
+				:Inspector: "Was your shop left unattended while you were away?"
+				:CM: "No, I left the key with the Baker so he could check in from time to time."
+				:Inspector: "Is there any chance the scale is in your shop?"
+				:CM: "I highly doubt it! I did use the scale on Monday, but the Farmer came and grabbed it before I left to visit my sister."
+				:Inspector: "Are you sure about that?"
+				:CM: "Oh yes! I remember it distinctly because the Farmer was acting kind of funny while he was here."
+				:Inspector: "Acting funny? In what way?"
+				:CM: "He looked rather unwell, to be honest. A bit green in the face. I asked if he was feeling under the weather, but he said he was fine."
+				:Inspector: "Did he do anything else of note?"
+				:CM: "He seemed to be in quite the hurry to leave, even though he usually likes to stay and chat."
+				:Inspector: "Could it have something to do with the evolving candles you were making for the Magistrate, with their... unique combination of scents?"
+				:CM: "Huh. I don't see how it could. Who doesn't love peppermint and bacon?"
+				=> QUESTION
+			 }
+			 ~ "Leave" => NUDGE
+		}
+	}
+}
